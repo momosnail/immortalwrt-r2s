@@ -6,6 +6,9 @@ on:
     paths:
       - 'r2s.config'
 
+permissions:
+  contents: write
+
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
   REPO_BRANCH: openwrt-24.10
@@ -87,6 +90,14 @@ jobs:
         rm -rf packages
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: Upload firmware to artifacts (fallback)
+      uses: actions/upload-artifact@v4
+      if: steps.organize.outputs.status == 'success'
+      with:
+        name: R2S-ImmortalWrt-firmware
+        path: ${{ env.FIRMWARE }}/*
+        retention-days: 7
 
     - name: Upload firmware to release
       uses: softprops/action-gh-release@v2
